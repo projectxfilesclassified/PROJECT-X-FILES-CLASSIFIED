@@ -1,0 +1,44 @@
+{
+  "name": "the-case-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "THE CASE FILES — Reusable Modular Criminal Investigation Dashboard & Administrator CMS",
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/lib/db/seed-cli.ts",
+    "validate:cases": "tsx src/lib/validation/validate-cli.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.800.0",
+    "@aws-sdk/s3-request-presigner": "^3.800.0",
+    "@electric-sql/pglite": "^0.2.17",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.43.1",
+    "lucide-react": "^0.511.0",
+    "next": "^15.3.3",
+    "pg": "^8.16.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwind-merge": "^3.3.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.6",
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.11.14",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "drizzle-kit": "^0.31.1",
+    "tailwindcss": "^4.1.6",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  }
+}
