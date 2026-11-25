@@ -274,4 +274,22 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX IF NOT EXISTS audit_logs_case_idx ON audit_logs (case_id);
 CREATE INDEX IF NOT EXISTS audit_logs_action_idx ON audit_logs (action);
 CREATE INDEX IF NOT EXISTS audit_logs_created_idx ON audit_logs (created_at);
+
+-- Lock down direct PostgREST/anon access on Supabase by enabling Row-Level Security
+-- without public policies; server-side Drizzle (postgres role) retains authoritative access.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auth_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE case_entitlements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE suspects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE suspect_relationships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE evidence_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE evidence_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE evidence_relations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE case_timeline_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE case_solutions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE investigation_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workspace_states ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accusation_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 `;

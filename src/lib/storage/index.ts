@@ -9,6 +9,7 @@ import {
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { ensureEnvLoaded } from '@/lib/env';
 
 export interface StoredObjectMeta {
   storageKey: string;
@@ -25,19 +26,84 @@ export interface SignedAssetPayload {
 }
 
 function getSigningSecret(): string {
+  ensureEnvLoaded();
   return (
     process.env.ASSET_SIGNING_SECRET?.trim() ||
     'dev-case-files-asset-signing-secret-change-in-production-4d3e2f1a'
   );
 }
 
-function getStorageDriver(): 'local' | 's3' {
-  return process.env.STORAGE_DRIVER === 's3' ? 's3' : 'local';
+function getStorageDriver(): 'local' | 's3' | 'supabase' {
+  ensureEnvLoaded();
+  if (process.env.STORAGE_DRIVER === 's3') return 's3';
+  if (process.env.STORAGE_DRIVER === 'supabase') return 'supabase';
+  return 'local';
 }
 
 function getLocalStorageRoot(): string {
+  ensureEnvLoaded();
   const configured = process.env.LOCAL_STORAGE_DIR?.trim() || './storage/private';
   return path.isAbsolute(configured) ? configured : path.join(process.cwd(), configured);
+}
+
+function getSupabaseStorageConfig() {
+  ensureEnvLoaded();
+  const url = (
+    process.env.SUPABASE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    ''
+  ).replace(/\/+$/, '');
+  const serviceKey =
+    process.env.SUPABASE_SECRET_KEY?.trim() ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    '';
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET?.trim() || 'casefiles-private';
+  if (!url || !serviceKey) {
+    throw new Error(
+      'SUPABASE_URL and SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY) must be configured when STORAGE_DRIVER=supabase',
+    );
+  }
+  return { url, serviceKey, bucket };
+}
+
+let supabaseBucketEnsured = false;
+
+async function ensureSupabasePrivateBucket(): Promise<void> {
+  if (supabaseBucketEnsured) return;
+  const { url, serviceKey, bucket } = getSupabaseStorageConfig();
+  const headers = {
+    Authorization: `Bearer ${serviceKey}`,
+    apikey: serviceKey,
+    'Content-Type': 'application/json',
+  };
+
+  const check = await fetch(`${url}/storage/v1/bucket/${encodeURIComponent(bucket)}`, { headers });
+  if (check.ok) {
+    supabaseBucketEnsured = true;
+    return;
+  }
+
+  const created = await fetch(`${url}/storage/v1/bucket`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      id: bucket,
+      name: bucket,
+      public: false,
+    }),
+  });
+  if (!created.ok && created.status !== 409) {
+    const errText = await created.text();
+    throw new Error(`Failed to provision private Supabase bucket "${bucket}": ${errText}`);
+  }
+  supabaseBucketEnsured = true;
+}
+
+function encodeObjectPath(storageKey: string): string {
+  return storageKey
+    .split('/')
+    .map((seg) => encodeURIComponent(seg))
+    .join('/');
 }
 
 let s3ClientSingleton: S3Client | null = null;
@@ -78,8 +144,28 @@ export async function putPrivateObject(
 ): Promise<StoredObjectMeta> {
   const safeKey = sanitizeStorageKey(storageKey);
   const sha256 = computeSha256(buffer);
+  const driver = getStorageDriver();
 
-  if (getStorageDriver() === 's3') {
+  if (driver === 'supabase') {
+    await ensureSupabasePrivateBucket();
+    const { url, serviceKey, bucket } = getSupabaseStorageConfig();
+    const res = await fetch(
+      `${url}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeObjectPath(safeKey)}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+          'Content-Type': mimeType,
+          'x-upsert': 'true',
+        },
+        body: new Uint8Array(buffer),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Supabase Storage upload failed (${res.status}): ${await res.text()}`);
+    }
+  } else if (driver === 's3') {
     const bucket = process.env.S3_BUCKET;
     if (!bucket) throw new Error('S3_BUCKET must be configured when STORAGE_DRIVER=s3');
     await getS3Client().send(
@@ -107,8 +193,26 @@ export async function putPrivateObject(
 
 export async function getPrivateObject(storageKey: string): Promise<Buffer> {
   const safeKey = sanitizeStorageKey(storageKey);
+  const driver = getStorageDriver();
 
-  if (getStorageDriver() === 's3') {
+  if (driver === 'supabase') {
+    const { url, serviceKey, bucket } = getSupabaseStorageConfig();
+    const res = await fetch(
+      `${url}/storage/v1/object/authenticated/${encodeURIComponent(bucket)}/${encodeObjectPath(safeKey)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+        },
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Supabase Storage read failed (${res.status})`);
+    }
+    return Buffer.from(await res.arrayBuffer());
+  }
+
+  if (driver === 's3') {
     const bucket = process.env.S3_BUCKET;
     if (!bucket) throw new Error('S3_BUCKET must be configured when STORAGE_DRIVER=s3');
     const response = await getS3Client().send(
@@ -125,8 +229,27 @@ export async function getPrivateObject(storageKey: string): Promise<Buffer> {
 
 export async function privateObjectExists(storageKey: string): Promise<boolean> {
   const safeKey = sanitizeStorageKey(storageKey);
+  const driver = getStorageDriver();
 
-  if (getStorageDriver() === 's3') {
+  if (driver === 'supabase') {
+    try {
+      const { url, serviceKey, bucket } = getSupabaseStorageConfig();
+      const res = await fetch(
+        `${url}/storage/v1/object/info/authenticated/${encodeURIComponent(bucket)}/${encodeObjectPath(safeKey)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${serviceKey}`,
+            apikey: serviceKey,
+          },
+        },
+      );
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  if (driver === 's3') {
     const bucket = process.env.S3_BUCKET;
     if (!bucket) return false;
     try {
@@ -148,8 +271,24 @@ export async function privateObjectExists(storageKey: string): Promise<boolean> 
 
 export async function deletePrivateObject(storageKey: string): Promise<void> {
   const safeKey = sanitizeStorageKey(storageKey);
+  const driver = getStorageDriver();
 
-  if (getStorageDriver() === 's3') {
+  if (driver === 'supabase') {
+    const { url, serviceKey, bucket } = getSupabaseStorageConfig();
+    await fetch(
+      `${url}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeObjectPath(safeKey)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+        },
+      },
+    );
+    return;
+  }
+
+  if (driver === 's3') {
     const bucket = process.env.S3_BUCKET;
     if (!bucket) return;
     await getS3Client().send(new DeleteObjectCommand({ Bucket: bucket, Key: safeKey }));

@@ -6,6 +6,7 @@ import { drizzle as drizzlePg, type NodePgDatabase } from 'drizzle-orm/node-post
 import { Pool } from 'pg';
 import * as schema from './schema';
 import { BOOTSTRAP_SQL } from './bootstrap';
+import { ensureEnvLoaded } from '@/lib/env';
 
 export type CaseFilesDb = NodePgDatabase<typeof schema> | PgliteDatabase<typeof schema>;
 
@@ -23,13 +24,21 @@ const globalForDb = globalThis as unknown as {
 };
 
 function createDbHolder(): DbHolder {
+  ensureEnvLoaded();
   const databaseUrl = process.env.DATABASE_URL?.trim();
 
   if (databaseUrl && !databaseUrl.startsWith('pglite://')) {
+    const isSupabaseOrRemoteSsl =
+      databaseUrl.includes('supabase.co') ||
+      databaseUrl.includes('supabase.com') ||
+      databaseUrl.includes('sslmode=require') ||
+      process.env.DATABASE_SSL === 'true';
+
     const pool = new Pool({
       connectionString: databaseUrl,
       max: 15,
       idleTimeoutMillis: 30000,
+      ssl: isSupabaseOrRemoteSsl ? { rejectUnauthorized: false } : undefined,
     });
     const db = drizzlePg(pool, { schema });
     const initialized = pool.query(BOOTSTRAP_SQL).then(() => undefined);
