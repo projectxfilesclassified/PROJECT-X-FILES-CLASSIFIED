@@ -45,10 +45,14 @@ function createDbHolder(): DbHolder {
     return { db, driver: 'postgres', initialized, pgPool: pool };
   }
 
-  // Embedded PostgreSQL (PGlite) for zero-config local execution and isolated test runs
-  const dataDir =
-    process.env.PGLITE_DATA_DIR?.trim() ||
-    (process.env.NODE_ENV === 'test' ? 'memory://' : path.join(process.cwd(), 'data', 'pglite'));
+  // Embedded PostgreSQL (PGlite) for zero-config local execution, Vercel preview fallback, and test runs
+  const defaultPgliteDir =
+    process.env.NODE_ENV === 'test'
+      ? 'memory://'
+      : process.env.VERCEL === '1'
+        ? '/tmp/casefiles-pglite'
+        : path.join(process.cwd(), 'data', 'pglite');
+  const dataDir = process.env.PGLITE_DATA_DIR?.trim() || defaultPgliteDir;
 
   if (dataDir !== 'memory://') {
     fs.mkdirSync(dataDir, { recursive: true });
