@@ -553,9 +553,9 @@ export default function InvestigationDashboard({
   const timerWarn = data.timer.status === 'active' && remainingSeconds <= 1800 && !timerUrgent;
 
   return (
-    <div className="h-screen flex flex-col bg-[#07080b] text-[#e8ecf2] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#060910]/72 backdrop-blur-[2px] text-[#e8ecf2] overflow-hidden">
       {/* 1. PERSISTENT TOP NAVIGATION BAR */}
-      <header className="h-14 shrink-0 border-b border-[#212836] bg-[#0b0e14] px-3 sm:px-4 flex items-center justify-between gap-2 z-30">
+      <header className="h-14 shrink-0 border-b border-[#223047] bg-[#080c14]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between gap-2 z-30">
         <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
@@ -794,7 +794,7 @@ export default function InvestigationDashboard({
         </aside>
 
         {/* 3. CENTRAL EVIDENCE & INVESTIGATION WORKSPACE */}
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-5 bg-[#080a0e]">
+        <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-5 bg-[#060910]/68">
           {activeNav === 'case_overview' && (
             <CaseOverviewView
               data={data}

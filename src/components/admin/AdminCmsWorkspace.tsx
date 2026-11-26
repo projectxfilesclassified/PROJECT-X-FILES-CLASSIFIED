@@ -579,9 +579,9 @@ export default function AdminCmsWorkspace({ adminUser }: { adminUser: ClientUser
     cfg.scoringConfig.weights.evidence;
 
   return (
-    <div className="min-h-screen bg-[#07080b] text-[#e8ecf2] flex flex-col">
+    <div className="min-h-screen bg-[#060910]/74 backdrop-blur-[2px] text-[#e8ecf2] flex flex-col">
       {/* Top CMS Bar */}
-      <header className="h-14 border-b border-[#212836] bg-[#0b0e14] px-5 flex items-center justify-between gap-4 sticky top-0 z-30">
+      <header className="h-14 border-b border-[#223047] bg-[#080c14]/90 backdrop-blur-md px-5 flex items-center justify-between gap-4 sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <Link
             href="/"

@@ -13,6 +13,8 @@ import {
 } from '@/lib/engine/timer';
 import { evaluateAccusationServerSide } from '@/lib/engine/scoring';
 import { runCaseValidationSuite } from '@/lib/validation/case-validator';
+import { getPublishedPublicCases } from '@/lib/seo/catalog';
+import { buildCaseProductJsonLd, buildHomeJsonLd } from '@/lib/seo/schema';
 import {
   createSignedAssetToken,
   getPrivateObject,
@@ -277,5 +279,25 @@ describe('THE CASE FILES — Core Engine, Security & Published Case Validation',
       expect(report.failures).toBe(0);
       expect(report.validForPublish).toBe(true);
     }
+  });
+
+  it('generates spoiler-free commercial SEO catalog and Schema.org JSON-LD graphs', async () => {
+    const publicCases = await getPublishedPublicCases();
+    expect(publicCases.length).toBeGreaterThanOrEqual(2);
+
+    const homeLd = buildHomeJsonLd(publicCases);
+    const homeJson = JSON.stringify(homeLd);
+    expect(homeJson).toContain('"@type":"Organization"');
+    expect(homeJson).toContain('"@type":"VideoGame"');
+    expect(homeJson).toContain('"@type":"ItemList"');
+    expect(homeJson).toContain('"@type":"FAQPage"');
+    expect(homeJson).not.toContain('killerSuspectId');
+    expect(homeJson).not.toContain('4819');
+
+    const productLd = buildCaseProductJsonLd(publicCases[0]!);
+    const productJson = JSON.stringify(productLd);
+    expect(productJson).toContain('"@type":"Product"');
+    expect(productJson).toContain('"@type":"BreadcrumbList"');
+    expect(productJson).toContain('https://schema.org/InStock');
   });
 });
