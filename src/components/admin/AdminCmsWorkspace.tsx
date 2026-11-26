@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldAlert,
   Plus,
   Copy,
   Eye,
@@ -25,6 +24,7 @@ import {
   KeyRound,
   Activity,
 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import type { ClientUser } from '@/lib/client-types';
 import {
   DEFAULT_SCORING_CONFIG,
@@ -589,12 +589,7 @@ export default function AdminCmsWorkspace({ adminUser }: { adminUser: ClientUser
           >
             <ArrowLeft className="w-3.5 h-3.5" /> DIRECTORY
           </Link>
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-[#dc2626]" />
-            <span className="font-mono text-xs font-bold tracking-[0.2em]">
-              THE CASE FILES // ADMINISTRATOR CMS
-            </span>
-          </div>
+          <BrandLogo variant="wordmark" size="sm" subtitle="ADMINISTRATOR CMS" />
         </div>
 
         <div className="flex items-center gap-3 font-mono text-[11px]">

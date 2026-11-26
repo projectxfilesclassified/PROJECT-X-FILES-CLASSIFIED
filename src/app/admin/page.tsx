@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ensureSeeded } from '@/lib/db/seed';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
 import AdminCmsWorkspace from '@/components/admin/AdminCmsWorkspace';
+import BrandLogo from '@/components/BrandLogo';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,9 @@ export default async function AdminPage() {
     return (
       <div className="min-h-screen bg-[#07080b] flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-lg border border-[#9e1b24] bg-[#120e12] p-6 text-center space-y-4">
-          <ShieldAlert className="w-8 h-8 text-[#dc2626] mx-auto" />
+          <div className="flex justify-center">
+            <BrandLogo variant="wordmark" size="sm" />
+          </div>
           <div className="font-mono text-xs uppercase tracking-[0.2em] text-[#fca5a5]">
             RBAC ACCESS DENIED — ADMINISTRATOR ROLE REQUIRED
           </div>

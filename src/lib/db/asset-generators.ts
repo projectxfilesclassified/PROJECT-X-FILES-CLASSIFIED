@@ -64,7 +64,7 @@ export function generateForensicPdf(params: {
 
     // Header text in light grey/white
     cmds.push('1 1 1 rg');
-    cmds.push(`BT /F2 11 Tf 52 784 Td (${escapePdfText(`THE CASE FILES // ${params.caseNumber} // ${params.evidenceCode}`)}) Tj ET`);
+    cmds.push(`BT /F2 11 Tf 52 784 Td (${escapePdfText(`PROJECT X FILES // ${params.caseNumber} // ${params.evidenceCode}`)}) Tj ET`);
     cmds.push('0.85 0.65 0.30 rg');
     cmds.push(`BT /F2 9 Tf 52 766 Td (${escapePdfText(`CLASSIFICATION: ${params.classification}`)}) Tj ET`);
 

@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldAlert,
   Search,
   Columns2,
   Clock,
@@ -33,6 +32,7 @@ import {
   Play,
   Lock,
 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import {
   formatDurationHms,
   type ClientEvidence,
@@ -569,13 +569,13 @@ export default function InvestigationDashboard({
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-90 transition shrink-0"
-            title="Return to Case Library"
+            title="Return to PROJECT X FILES — CLASSIFIED Case Directory"
           >
-            <div className="w-7 h-7 rounded bg-[#9e1b24]/25 border border-[#9e1b24] flex items-center justify-center">
-              <ShieldAlert className="w-4 h-4 text-[#dc2626]" />
-            </div>
-            <span className="hidden sm:inline font-mono text-xs font-bold tracking-[0.2em]">
-              THE CASE FILES
+            <span className="sm:hidden">
+              <BrandLogo variant="mark" size="sm" />
+            </span>
+            <span className="hidden sm:inline-flex">
+              <BrandLogo variant="wordmark" size="sm" />
             </span>
           </Link>
 

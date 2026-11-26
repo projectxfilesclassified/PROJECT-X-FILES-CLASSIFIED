@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  ShieldAlert,
   Lock,
   Unlock,
   Clock,
@@ -17,6 +16,7 @@ import {
   FolderKanban,
   Sparkles,
 } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 import { formatDurationHms, type ClientUser } from '@/lib/client-types';
 import type { CaseDifficulty, CaseMetadata, CaseStatus } from '@/lib/types';
 
@@ -152,21 +152,13 @@ export default function CaseLibraryClient({
   if (!user) {
     return (
       <div className="min-h-screen bg-[#07080b] forensic-grid flex flex-col justify-between">
-        <header className="border-b border-[#222937] bg-[#0c0f15]/90 backdrop-blur px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-[#9e1b24]/20 border border-[#9e1b24] flex items-center justify-center">
-              <ShieldAlert className="w-4 h-4 text-[#dc2626]" />
-            </div>
-            <div>
-              <div className="font-mono text-xs tracking-[0.26em] text-[#e8ecf2] font-semibold">
-                THE CASE FILES
-              </div>
-              <div className="font-mono text-[10px] tracking-[0.18em] text-[#667389] uppercase">
-                FORENSIC INTELLIGENCE TERMINAL // v2.4
-              </div>
-            </div>
-          </div>
-          <span className="font-mono text-[11px] px-2.5 py-1 rounded border border-[#2a3345] bg-[#11151f] text-[#c88a2e]">
+        <header className="border-b border-[#222937] bg-[#0c0f15]/95 backdrop-blur px-6 py-3 flex items-center justify-between gap-4">
+          <BrandLogo
+            variant="wordmark"
+            size="md"
+            subtitle="FORENSIC INTELLIGENCE TERMINAL // v2.4"
+          />
+          <span className="font-mono text-[11px] px-2.5 py-1 rounded border border-[#2a3345] bg-[#11151f] text-[#c88a2e] shrink-0">
             RESTRICTED ACCESS
           </span>
         </header>
@@ -345,7 +337,7 @@ export default function CaseLibraryClient({
         </main>
 
         <footer className="border-t border-[#1b212d] px-6 py-3 text-center font-mono text-[10px] tracking-[0.15em] text-[#556175]">
-          THE CASE FILES INTELLIGENCE PLATFORM — ALL EVIDENCE ASSETS PROTECTED BY SIGNED PRIVATE DELIVERY
+          PROJECT X FILES // CLASSIFIED — ALL EVIDENCE ASSETS PROTECTED BY SIGNED PRIVATE DELIVERY
         </footer>
       </div>
     );
@@ -354,20 +346,12 @@ export default function CaseLibraryClient({
   return (
     <div className="min-h-screen bg-[#07080b] text-[#e8ecf2]">
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 border-b border-[#222937] bg-[#0b0e14]/95 backdrop-blur px-5 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#9e1b24]/20 border border-[#9e1b24] flex items-center justify-center">
-            <ShieldAlert className="w-4 h-4 text-[#dc2626]" />
-          </div>
-          <div>
-            <div className="font-mono text-xs tracking-[0.24em] font-semibold text-[#e8ecf2]">
-              THE CASE FILES
-            </div>
-            <div className="font-mono text-[10px] tracking-[0.14em] text-[#728096]">
-              ACTIVE CASE ARCHIVE // MULTI-CASE ENGINE
-            </div>
-          </div>
-        </div>
+      <header className="sticky top-0 z-30 border-b border-[#222937] bg-[#0b0e14]/95 backdrop-blur px-5 py-2.5 flex items-center justify-between gap-4">
+        <BrandLogo
+          variant="wordmark"
+          size="sm"
+          subtitle="ACTIVE CASE ARCHIVE // MULTI-CASE ENGINE"
+        />
 
         <div className="flex items-center gap-3">
           {user.role === 'admin' && (
